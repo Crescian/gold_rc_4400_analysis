@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gold RC Analysis — Julius Baer 30.5% XAU/USD · Strike $4,400</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-annotation/3.0.1/chartjs-plugin-annotation.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --gold:#C9963A; --gold-light:#E8B86D; --gold-dim:rgba(201,150,58,0.12);
+  --red:#C0392B; --red-dim:rgba(192,57,43,0.1);
+  --green:#1A7A4A; --green-dim:rgba(26,122,74,0.1);
+  --amber:#B07D2E; --amber-dim:rgba(176,125,46,0.1);
+  --blue:#1A5A8A; --blue-dim:rgba(26,90,138,0.08);
+  --bg:#0D0E10; --bg2:#13151A; --bg3:#1A1D24;
+  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.12);
+  --text:#E8E6DF; --text2:#9A9890; --text3:#5A5855;
+  --serif:'DM Serif Display',Georgia,serif;
+  --sans:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6;min-height:100vh;}
+
+/* HEADER */
+.header{border-bottom:1px solid var(--border);padding:32px 40px 28px;display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap;}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-bottom:8px;}
+.title{font-family:var(--serif);font-size:clamp(22px,3vw,34px);font-weight:400;line-height:1.15;color:var(--text);}
+.title em{font-style:italic;color:var(--gold-light);}
+.subtitle{font-size:13px;color:var(--text2);margin-top:8px;}
+.price{font-family:var(--mono);font-size:28px;font-weight:500;color:var(--text);text-align:right;}
+.price-label{font-size:11px;color:var(--text3);margin-top:2px;text-align:right;}
+
+/* VERDICT BANNER */
+.verdict-banner{background:linear-gradient(135deg,rgba(192,57,43,0.15),rgba(192,57,43,0.05));border-bottom:1px solid rgba(192,57,43,0.25);padding:14px 40px;display:flex;align-items:center;gap:12px;}
+.vdot{width:8px;height:8px;border-radius:50%;background:var(--red);flex-shrink:0;}
+.vtext{font-size:13px;color:var(--text2);}
+.vtext strong{color:var(--text);}
+
+/* TABS */
+.tab-bar{display:flex;border-bottom:1px solid var(--border);padding:0 40px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.tab-bar::-webkit-scrollbar{display:none;}
+.tab-btn{padding:15px 18px;font-size:13px;font-family:var(--sans);color:var(--text3);background:transparent;border:none;border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:color .15s,border-color .15s;}
+.tab-btn:hover{color:var(--text2);}
+.tab-btn.active{color:var(--gold);border-bottom-color:var(--gold);}
+.tab-content{display:none;padding:36px 40px;}
+.tab-content.active{display:block;}
+
+/* METRICS */
+.metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:28px;}
+.metric{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;}
+.mlabel{font-size:11px;color:var(--text3);margin-bottom:4px;font-family:var(--mono);letter-spacing:.04em;}
+.mvalue{font-size:20px;font-weight:500;color:var(--text);line-height:1.2;}
+.msub{font-size:11px;color:var(--text3);margin-top:3px;}
+.metric.warn{border-color:rgba(201,150,58,0.3);} .metric.warn .mvalue{color:var(--gold);}
+.metric.danger{border-color:rgba(192,57,43,0.25);} .metric.danger .mvalue{color:var(--red);}
+.metric.good{border-color:rgba(26,122,74,0.25);} .metric.good .mvalue{color:var(--green);}
+
+/* SECTION TITLES */
+.stitle{font-family:var(--serif);font-size:20px;font-weight:400;color:var(--text);margin:32px 0 16px;padding-bottom:10px;border-bottom:1px solid var(--border);}
+.stitle:first-child{margin-top:0;}
+
+/* PILLS */
+.pill{display:inline-block;font-size:11px;padding:2px 9px;border-radius:99px;font-family:var(--mono);}
+.pr{background:var(--red-dim);color:#E07060;border:1px solid rgba(192,57,43,0.2);}
+.pg{background:var(--green-dim);color:#60B080;border:1px solid rgba(26,122,74,0.2);}
+.pa{background:var(--amber-dim);color:var(--gold-light);border:1px solid rgba(176,125,46,0.2);}
+.pb{background:var(--blue-dim);color:#70A8D8;border:1px solid rgba(26,90,138,0.2);}
+
+/* FACTOR ROWS */
+.frow{display:flex;gap:14px;padding:16px 0;border-bottom:1px solid var(--border);align-items:flex-start;}
+.frow:last-child{border-bottom:none;}
+.ficon{font-size:16px;flex-shrink:0;margin-top:2px;width:22px;}
+.ftitle{font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px;}
+.fbody{font-size:13px;color:var(--text2);line-height:1.6;}
+
+/* SLIDER */
+.slider-wrap{display:flex;align-items:center;gap:14px;margin:16px 0;}
+.slabel{font-size:13px;color:var(--text2);min-width:110px;}
+.sval{font-family:var(--mono);font-size:14px;font-weight:500;color:var(--text);min-width:80px;text-align:right;}
+input[type=range]{flex:1;-webkit-appearance:none;height:4px;background:var(--bg3);border-radius:2px;outline:none;cursor:pointer;}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;background:var(--gold);border-radius:50%;cursor:pointer;box-shadow:0 0 0 3px rgba(201,150,58,0.2);}
+.payoff-result{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px 18px;margin:16px 0;}
+.pamount{font-size:28px;font-weight:500;margin:4px 0;}
+.pdesc{font-size:13px;color:var(--text2);}
+.pnote{font-size:12px;color:var(--text3);margin-top:8px;}
+
+/* CHARTS */
+.chart-label{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text3);margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.tag{font-size:10px;padding:1px 6px;border-radius:3px;letter-spacing:.03em;}
+.tag-src{background:rgba(26,90,138,0.2);color:#70A8D8;border:1px solid rgba(26,90,138,0.25);}
+.tag-inf{background:rgba(176,125,46,0.15);color:var(--gold-light);border:1px solid rgba(176,125,46,0.2);}
+.tag-hard{background:rgba(26,122,74,0.15);color:#60B080;border:1px solid rgba(26,122,74,0.2);}
+.cwrap{position:relative;width:100%;}
+.legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;}
+.leg{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--text3);}
+.leg-line{width:20px;height:2px;border-radius:2px;flex-shrink:0;}
+.tension{border-left:2px solid var(--gold);padding:10px 16px;margin:20px 0;font-size:13px;color:var(--text2);line-height:1.6;font-style:italic;}
+.tension strong{color:var(--text);font-style:normal;}
+.info-note{font-size:11px;color:var(--text3);margin-top:8px;line-height:1.55;}
+
+/* DATA TABLES */
+.tier-block{margin-bottom:32px;}
+.tier-header{font-family:var(--serif);font-size:18px;font-weight:400;color:var(--text);margin-bottom:4px;}
+.tier-sub{font-size:13px;color:var(--text3);margin-bottom:12px;}
+.tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--border);border-radius:8px;}
+table{width:100%;border-collapse:collapse;font-size:12px;min-width:540px;}
+thead th{padding:9px 14px;font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;background:var(--bg3);border-bottom:1px solid var(--border);text-align:left;white-space:nowrap;}
+thead th.cur{background:rgba(201,150,58,0.1);color:var(--gold);border-bottom-color:rgba(201,150,58,0.3);}
+tbody tr{border-bottom:1px solid var(--border);}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:nth-child(even){background:rgba(255,255,255,0.02);}
+td{padding:10px 14px;color:var(--text2);vertical-align:top;line-height:1.45;}
+td:first-child{color:var(--text);font-weight:500;min-width:150px;}
+td.cur{background:rgba(201,150,58,0.04);border-left:2px solid rgba(201,150,58,0.35);border-right:2px solid rgba(201,150,58,0.35);}
+.g{color:#60B080;} .r{color:#E07060;} .a{color:var(--gold-light);}
+.tsub{font-size:11px;color:var(--text3);}
+.tsrc{font-size:11px;color:var(--text3);margin-top:6px;font-style:italic;}
+.wc-y{color:#60B080;font-weight:500;} .wc-n{color:var(--text3);}
+.no-analogue{font-size:12px;color:var(--gold-light);margin-top:10px;padding:10px 14px;border-left:2px solid rgba(201,150,58,0.4);line-height:1.55;}
+.interp-box{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:18px 20px;margin-top:8px;font-size:13px;color:var(--text2);line-height:1.7;}
+.interp-box strong{color:var(--text);}
+
+/* VERDICT */
+.vbox{background:linear-gradient(135deg,rgba(192,57,43,0.12),rgba(192,57,43,0.04));border:1px solid rgba(192,57,43,0.25);border-radius:10px;padding:20px 22px;margin:20px 0;}
+.vbox-label{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--red);margin-bottom:10px;}
+.vbox-body{font-size:14px;color:var(--text);line-height:1.7;}
+.acard{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:14px 16px;margin-bottom:10px;}
+.atitle{font-size:14px;font-weight:500;color:var(--text);margin-bottom:4px;}
+.abody{font-size:13px;color:var(--text2);line-height:1.6;}
+.risk-warn{background:var(--red-dim);border:1px solid rgba(192,57,43,0.2);border-radius:6px;padding:10px 14px;margin:12px 0;font-size:13px;color:#E07060;line-height:1.5;}
+.divider{border:none;border-top:1px solid var(--border);margin:28px 0;}
+.disclaimer{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:16px 18px;margin-top:40px;font-size:12px;color:var(--text3);line-height:1.65;}
+.disclaimer strong{color:var(--text2);}
+.footer{border-top:1px solid var(--border);padding:20px 40px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;font-size:12px;color:var(--text3);}
+.footer-logo{font-family:var(--serif);font-size:14px;color:var(--text2);}
+
+@media(max-width:640px){
+  .header,.tab-content,.footer,.verdict-banner{padding-left:20px;padding-right:20px;}
+  .tab-bar{padding:0 16px;}
+  .tab-btn{padding:12px 12px;font-size:12px;}
+  .metrics{grid-template-columns:1fr 1fr;}
+  .price{font-size:20px;}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div>
+    <div class="eyebrow">Investment Analysis · Confidential · 31 March 2026</div>
+    <h1 class="title">Julius Baer <em>30.5% p.a.</em><br>Reverse Convertible on XAU/USD</h1>
+    <p class="subtitle">Strike $4,400 · 33-day term · Issue 2 Apr 2026 · Expiry 5 May 2026 · Issuer: Bank Julius Baer (Moody's A3)</p>
+  </div>
+  <div>
+    <div class="price">$4,562</div>
+    <div class="price-label">XAU/USD spot · 31 Mar 2026</div>
+  </div>
+</header>
+
+<div class="verdict-banner">
+  <div class="vdot"></div>
+  <div class="vtext"><strong>Analyst conclusion:</strong> Product carries elevated risk relative to stated coupon. The $4,400 strike falls inside last week's trading range. Not recommended for investors with a bullish directional view on gold.</div>
+</div>
+
+<nav class="tab-bar">
+  <button class="tab-btn active" onclick="showTab('payoff',this)">Payoff simulator</button>
+  <button class="tab-btn" onclick="showTab('macro',this)">Macro factors</button>
+  <button class="tab-btn" onclick="showTab('history',this)">Historical parallels</button>
+  <button class="tab-btn" onclick="showTab('data',this)">Data tables</button>
+  <button class="tab-btn" onclick="showTab('verdict',this)">Verdict</button>
+</nav>
+
+<!-- ═══ PAYOFF ═══ -->
+<section class="tab-content active" id="tab-payoff">
+  <div class="metrics">
+    <div class="metric"><div class="mlabel">Initial level</div><div class="mvalue">$4,562</div><div class="msub">XAU/USD today</div></div>
+    <div class="metric warn"><div class="mlabel">Strike price</div><div class="mvalue">$4,400</div><div class="msub">−3.55% from today</div></div>
+    <div class="metric good"><div class="mlabel">Max payout</div><div class="mvalue">+2.80%</div><div class="msub">$102,795 in 33 days</div></div>
+    <div class="metric"><div class="mlabel">Break-even</div><div class="mvalue">$4,280</div><div class="msub">−6.16% from today</div></div>
+    <div class="metric good"><div class="mlabel">Coupon p.a.</div><div class="mvalue">30.5%</div><div class="msub">$2,795.83 for 33 days</div></div>
+    <div class="metric"><div class="mlabel">If breached</div><div class="mvalue">23.36 oz</div><div class="msub">XAU delivered</div></div>
+  </div>
+  <div class="risk-warn">⚠ Gold's weekly range last week: $4,352–$4,617 — a $265 swing. The $4,400 strike falls inside last week's price range. This is not a tail-risk scenario in the current environment.</div>
+  <div class="slider-wrap">
+    <span class="slabel">Final gold price</span>
+    <input type="range" min="3200" max="5500" step="10" value="4562" id="gp" oninput="calc()">
+    <span class="sval" id="gd">$4,562</span>
+  </div>
+  <div class="payoff-result">
+    <div id="pb"></div>
+    <div class="pamount" id="pu"></div>
+    <div class="pdesc" id="pp"></div>
+    <div class="pnote" id="pn"></div>
+  </div>
+  <div class="chart-label" style="margin-top:24px">Payoff diagram — hover for full breakdown</div>
+  <div class="cwrap" style="height:240px"><canvas id="payoffChart"></canvas></div>
+</section>
+
+<!-- ═══ MACRO ═══ -->
+<section class="tab-content" id="tab-macro">
+  <p style="font-size:13px;color:var(--text2);margin-bottom:24px;line-height:1.7">Six macro factors assessed for their impact on XAU/USD over the 33-day window ending 30 April 2026. All data sourced as of 31 March 2026.</p>
+  <div class="frow"><div class="ficon">🛢️</div><div><div class="ftitle">Iran conflict &amp; oil shock</div><div class="fbody">The US-Israel-Iran conflict, now in its 5th week, has pushed Brent crude above $115/barrel. High oil fuels inflation → rate-hike bets → stronger USD → headwind for non-yielding gold. Gold fell 14% in March despite the war. The typical "geopolitical = buy gold" reflex has inverted in this environment. <span class="pill pr">Net bearish near-term</span></div></div></div>
+  <div class="frow"><div class="ficon">📈</div><div><div class="ftitle">Fed rate-hike risk</div><div class="fbody">CME FedWatch shows over 50% probability of a Fed hike by year-end. OECD raised US inflation forecast to 4.2% vs. Fed's 2.7% target. April brings JOLTS (Apr 1), ADP employment (Apr 1), NFP + unemployment (Apr 3), and likely a CPI print. Any upside inflation surprise could push gold sharply below $4,400. <span class="pill pr">Bearish</span></div></div></div>
+  <div class="frow"><div class="ficon">📍</div><div><div class="ftitle">$4,325–$4,400 is the technical battleground</div><div class="fbody">Multiple technical analysts identify this zone as the key contested range entering Q2 2026. Bears target $4,100 on a break below $4,325. Bulls need a close above $4,400 to confirm recovery toward $4,695. The strike sits at the precise demarcation line. <span class="pill pa">Strike in the danger zone</span></div></div></div>
+  <div class="frow"><div class="ficon">🕊️</div><div><div class="ftitle">Ceasefire wildcard</div><div class="fbody">A 15-point ceasefire proposal via Pakistani diplomatic channels emerged late March. If ceasefire materialises: oil drops, rate-hike bets unwind, dollar softens — four simultaneous gold tailwinds. Binary and unpredictable. A ceasefire could push gold well above $5,000 rapidly. <span class="pill pb">Upside wildcard</span></div></div></div>
+  <div class="frow"><div class="ficon">🏦</div><div><div class="ftitle">Central bank buying — structural floor</div><div class="fbody">WGC data: 1,045t purchased in 2024, 863t in 2025 — third consecutive year near the 1,000-tonne threshold. 95% of CBs expect to increase reserves. JPMorgan projects 755t in 2026. This demand creates a quarterly price floor — but does not prevent intra-month spikes below $4,400. <span class="pill pg">Long-term supportive</span></div></div></div>
+  <div class="frow"><div class="ficon">💵</div><div><div class="ftitle">USD strength &amp; de-dollarisation</div><div class="fbody">Dollar has strengthened alongside rising bond yields — direct headwind for dollar-priced gold. Near-term: rate-hike USD strength dominates. Long-term: de-dollarisation (post-2022 Russia sanctions) is a structural tailwind. For a 33-day product, the near-term force dominates. <span class="pill pr">Bearish near-term</span> <span class="pill pg">Bullish long-term</span></div></div></div>
+</section>
+
+<!-- ═══ HISTORY ═══ -->
+<section class="tab-content" id="tab-history">
+  <div class="metrics">
+    <div class="metric danger"><div class="mlabel">Current drawdown <span class="tag tag-hard">hard data</span></div><div class="mvalue">−18.5%</div><div class="msub">From $5,597 peak → ~$4,562</div></div>
+    <div class="metric"><div class="mlabel">Jan 2026 peak <span class="tag tag-hard">hard data</span></div><div class="mvalue">$5,597</div><div class="msub">All-time high</div></div>
+    <div class="metric warn"><div class="mlabel">Best analogue <span class="tag tag-inf">inferred</span></div><div class="mvalue">2022</div><div class="msub">Closest structural match</div></div>
+    <div class="metric"><div class="mlabel">Reuters median <span class="tag tag-src">sourced</span></div><div class="mvalue">$4,746</div><div class="msub">30 analysts, year-end 2026</div></div>
+  </div>
+
+  <div class="chart-label">Chart 1 — % drawdown from peak <span class="tag tag-inf">similarity inferred</span></div>
+  <div class="cwrap" style="height:280px"><canvas id="pctChart"></canvas></div>
+  <div class="legend">
+    <div class="leg"><div class="leg-line" style="background:#4CAF7D"></div>2026 current</div>
+    <div class="leg"><div class="leg-line" style="background:#5B9BD5"></div>2022 rate hike</div>
+    <div class="leg"><div class="leg-line" style="background:#C9963A"></div>1974 oil shock</div>
+    <div class="leg"><div class="leg-line" style="background:#444;border-top:2px dashed #444;height:0"></div>2020 COVID</div>
+    <div class="leg"><div class="leg-line" style="background:#C0392B"></div>$4,400 strike (−21.4%)</div>
+    <div class="leg"><div class="leg-line" style="background:#C9963A;border-top:2px dashed;height:0"></div>$4,200 strike (−25.0%)</div>
+  </div>
+  <div class="info-note">All episodes normalised to 0% at their peaks. Hover for % and equivalent dollar price.</div>
+
+  <div class="tension"><strong>The key tension:</strong> Chart 2 below looks bullish — but the path to those year-end targets can still pass through the strike levels before April 30. For a 33-day product, only the path in this window matters.</div>
+
+  <div class="chart-label">Chart 2 — analyst year-end 2026 targets <span class="tag tag-src">sourced — named institutions</span></div>
+  <div class="cwrap" style="height:230px"><canvas id="targetChart"></canvas></div>
+  <div class="info-note">Year-end 2026 targets only. A Goldman Sachs target of $5,400 is compatible with gold at $4,100 in April before recovering.</div>
+
+  <div class="divider"></div>
+  <h2 class="stitle">Historical analogue detail</h2>
+
+  <div class="acard">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:14px;font-weight:500;color:var(--text)">2022 rate hike — primary analogue</span><span style="font-family:var(--mono);font-size:11px;padding:2px 9px;border-radius:99px;background:var(--red-dim);color:#E07060;border:1px solid rgba(192,57,43,0.2)">Closest match</span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+      <span style="font-size:11px;padding:2px 7px;border-radius:3px;background:var(--green-dim);color:#60B080">Rates rising ✓</span>
+      <span style="font-size:11px;padding:2px 7px;border-radius:3px;background:var(--green-dim);color:#60B080">Supply-push inflation ✓</span>
+      <span style="font-size:11px;padding:2px 7px;border-radius:3px;background:var(--green-dim);color:#60B080">CB buying floor ✓</span>
+      <span style="font-size:11px;padding:2px 7px;border-radius:3px;background:var(--green-dim);color:#60B080">Active war ✓</span>
+      <span style="font-size:11px;padding:2px 7px;border-radius:3px;background:var(--green-dim);color:#60B080">De-dollarization ✓</span>
+    </div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.6">Gold fell −21% in 2022 despite the Ukraine war, as rate-hike expectations dominated. CB buying (1,082t that year) was the key floor. A −21% drop from $5,597 = <strong style="color:#E07060">~$4,421</strong> — barely above the $4,400 strike. This is the base case.</div>
+  </div>
+
+  <div class="acard">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:14px;font-weight:500;color:var(--text)">1974 oil shock — secondary analogue</span><span style="font-family:var(--mono);font-size:11px;padding:2px 9px;border-radius:99px;background:var(--amber-dim);color:var(--gold-light);border:1px solid rgba(176,125,46,0.2)">Partial match</span></div>
+    <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px">
+      <span style="font-size:11px;padding:2px 7px;border-radius:3px;background:var(--green-dim);color:#60B080">Oil shock ✓</span>
+      <span style="font-size:11px;padding:2px 7px;border-radius:3px;background:var(--green-dim);color:#60B080">War ✓</span>
+      <span style="font-size:11px;padding:2px 7px;border-radius:3px;background:var(--green-dim);color:#60B080">Fed hiking ✓</span>
+      <span style="font-size:11px;padding:2px 7px;border-radius:3px;background:var(--red-dim);color:#E07060">CBs net sellers ✗</span>
+      <span style="font-size:11px;padding:2px 7px;border-radius:3px;background:var(--red-dim);color:#E07060">Retail mania ✗</span>
+    </div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.6">Raw drawdown was −52%. Key divergence: CBs were net sellers in 1974; today WGC reports 863t purchased in 2025. The 1974 episode likely overstates current downside — the Data Tables tab shows exactly how different the CB regime is.</div>
+  </div>
+</section>
+
+<!-- ═══ DATA TABLES ═══ -->
+<section class="tab-content" id="tab-data">
+  <p style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:24px">Actual sourced quantitative data for each episode — no inferred scores. The 2026 column is highlighted. Green = tailwind for gold. Amber = mixed. Red = headwind. Sources per table. <span class="tag tag-hard">hard data</span> <span class="tag tag-src">sourced</span></p>
+
+  <!-- T1 -->
+  <div class="tier-block">
+    <div class="tier-header">Tier 1 — Structural drivers</div>
+    <div class="tier-sub">These determine gold's direction. The most important tier for any comparison.</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Factor</th><th class="cur">2026 (now)</th><th>2022</th><th>1974</th><th>2020</th><th>1980</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>Fed funds rate</td>
+            <td class="cur"><span class="a">3.5–3.75%</span><br><span class="tsub">Hold; hike risk</span></td>
+            <td><span class="r">0% → 5.25%</span><br><span class="tsub">Fastest hike in 40 yrs</span></td>
+            <td><span class="r">7% → 11%</span><br><span class="tsub">Burns Fed hiking</span></td>
+            <td><span class="g">0–0.25%</span><br><span class="tsub">Emergency cut</span></td>
+            <td><span class="r">~20% peak</span><br><span class="tsub">Volcker shock</span></td>
+          </tr>
+          <tr>
+            <td>CPI inflation</td>
+            <td class="cur"><span class="a">~4.2%</span><br><span class="tsub">OECD forecast</span></td>
+            <td><span class="r">9.1% peak</span><br><span class="tsub">Jun 2022 (40-yr high)</span></td>
+            <td><span class="r">12.3% peak</span><br><span class="tsub">Dec 1974, OPEC shock</span></td>
+            <td><span class="g">1.2%</span><br><span class="tsub">Deflationary</span></td>
+            <td><span class="r">13.5%</span><br><span class="tsub">Double-digit peak</span></td>
+          </tr>
+          <tr>
+            <td>Real rate<br><span class="tsub">(nominal − CPI)</span></td>
+            <td class="cur"><span class="a">~−0.5% to +0.5%</span><br><span class="tsub">Near zero; uncertain</span></td>
+            <td><span class="g">−6% → +2%</span><br><span class="tsub">Started deeply negative</span></td>
+            <td><span class="g">~−5%</span><br><span class="tsub">Rates lagged inflation</span></td>
+            <td><span class="g">~−1%</span><br><span class="tsub">Near-zero rates</span></td>
+            <td><span class="r">~+6%</span><br><span class="tsub">20% rate, 13.5% CPI</span></td>
+          </tr>
+          <tr>
+            <td>Oil price (peak)</td>
+            <td class="cur"><span class="r">~$115/bbl</span><br><span class="tsub">Brent; Iran war spike</span></td>
+            <td><span class="r">$139/bbl (Brent)</span><br><span class="tsub">Mar 2022; Ukraine</span></td>
+            <td><span class="r">$3 → $12/bbl</span><br><span class="tsub">+240%; OPEC embargo</span></td>
+            <td><span class="g">−$37/bbl (WTI)</span><br><span class="tsub">Negative; lockdowns</span></td>
+            <td><span class="r">~$39/bbl</span><br><span class="tsub">+260% from 1979</span></td>
+          </tr>
+          <tr>
+            <td>CB gold demand<br><span class="tsub">(net annual tonnes)</span></td>
+            <td class="cur"><span class="g">~755t projected</span><br><span class="tsub">JPMorgan / WGC 2026</span></td>
+            <td><span class="g">1,082t (record)</span><br><span class="tsub">WGC Gold Demand Trends</span></td>
+            <td><span class="r">Net seller</span><br><span class="tsub">WGC historical</span></td>
+            <td><span class="g">~255t</span><br><span class="tsub">WGC Gold Demand Trends</span></td>
+            <td><span class="r">Net seller</span><br><span class="tsub">WGC historical</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="tsrc">Sources: Federal Reserve / FRED, BLS CPI data, WGC Gold Demand Trends (2024 full year, 2025 full year), OECD Economic Outlook Mar 2026, oil price historical data</div>
+  </div>
+
+  <!-- T2 -->
+  <div class="tier-block">
+    <div class="tier-header">Tier 2 — Sentiment &amp; positioning</div>
+    <div class="tier-sub">Explains the magnitude of moves, not just direction.</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Factor</th><th class="cur">2026 (now)</th><th>2022</th><th>1974</th><th>2020</th><th>1980</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>USD index (DXY)</td>
+            <td class="cur"><span class="a">~100, rising</span><br><span class="tsub">Iran war safe-haven</span></td>
+            <td><span class="r">95 → 115</span><br><span class="tsub">Fastest rise in 20 yrs</span></td>
+            <td><span class="g">~80s, weakening</span><br><span class="tsub">Post-Bretton Woods</span></td>
+            <td><span class="g">103 → 89</span><br><span class="tsub">Falling; QE weaker $</span></td>
+            <td><span class="r">~125</span><br><span class="tsub">All-time high</span></td>
+          </tr>
+          <tr>
+            <td>Gold drawdown<br><span class="tsub">(from cycle peak)</span></td>
+            <td class="cur"><span class="a">−18.5% so far</span><br><span class="tsub">From $5,597; 2 months</span></td>
+            <td><span class="a">−21% total</span><br><span class="tsub">~9 months duration</span></td>
+            <td><span class="r">−52% total</span><br><span class="tsub">~2 years duration</span></td>
+            <td><span class="g">−14% total</span><br><span class="tsub">~1 month; fast recovery</span></td>
+            <td><span class="r">−43% total</span><br><span class="tsub">~2 months; very fast</span></td>
+          </tr>
+          <tr>
+            <td>Geopolitical event</td>
+            <td class="cur">US-Israel-Iran war<br><span class="tsub">Active; 5th week</span></td>
+            <td>Russia-Ukraine war<br><span class="tsub">Rate fears dominated</span></td>
+            <td>Yom Kippur + OPEC<br><span class="tsub">Oil embargo +240%</span></td>
+            <td>COVID-19 pandemic<br><span class="tsub">Global lockdowns</span></td>
+            <td>Iran hostage + USSR<br><span class="tsub">Afghanistan invasion</span></td>
+          </tr>
+          <tr>
+            <td>Fed credibility</td>
+            <td class="cur"><span class="a">Moderate</span><br><span class="tsub">OECD 4.2% vs Fed 2.7%</span></td>
+            <td><span class="r">Low initially</span><br><span class="tsub">Called inflation "transitory"</span></td>
+            <td><span class="r">Low (Burns Fed)</span><br><span class="tsub">Politically influenced</span></td>
+            <td><span class="g">High</span><br><span class="tsub">Decisive; Bernanke</span></td>
+            <td><span class="g">Restoring</span><br><span class="tsub">Volcker breaking inflation</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="tsrc">Sources: DXY historical data (Investing.com/FRED), gold price historical data, geopolitical record, Federal Reserve historical record</div>
+  </div>
+
+  <!-- T3 -->
+  <div class="tier-block">
+    <div class="tier-header">Tier 3 — Macro context</div>
+    <div class="tier-sub">Broad economic conditions during each episode.</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Factor</th><th class="cur">2026 (now)</th><th>2022</th><th>1974</th><th>2020</th><th>1980</th></tr></thead>
+        <tbody>
+          <tr>
+            <td>US GDP growth</td>
+            <td class="cur"><span class="g">+2.4%</span><br><span class="tsub">Fed SEP, Mar 2026</span></td>
+            <td><span class="g">+2.1%</span><br><span class="tsub">BEA</span></td>
+            <td><span class="r">−0.5%</span><br><span class="tsub">Recession; BEA/Fed</span></td>
+            <td><span class="r">−3.4%</span><br><span class="tsub">COVID collapse; BEA</span></td>
+            <td><span class="r">−0.3%</span><br><span class="tsub">Volcker recession; BEA</span></td>
+          </tr>
+          <tr>
+            <td>US unemployment</td>
+            <td class="cur"><span class="g">4.4%</span><br><span class="tsub">Fed SEP, Mar 2026</span></td>
+            <td><span class="g">3.5%</span><br><span class="tsub">Historic low; BLS</span></td>
+            <td><span class="r">7.2%</span><br><span class="tsub">BLS / Fed history</span></td>
+            <td><span class="r">14.7% peak</span><br><span class="tsub">COVID spike; BLS</span></td>
+            <td><span class="r">7.2%</span><br><span class="tsub">Recession; BLS</span></td>
+          </tr>
+          <tr>
+            <td>US debt / GDP</td>
+            <td class="cur"><span class="r">~125%</span><br><span class="tsub">$36T; limits Fed action</span></td>
+            <td><span class="r">~120%</span><br><span class="tsub">Post-COVID elevated</span></td>
+            <td><span class="g">~31%</span><br><span class="tsub">Pre-deficit era</span></td>
+            <td><span class="r">~129%</span><br><span class="tsub">COVID peak</span></td>
+            <td><span class="g">~32%</span><br><span class="tsub">Pre-Reagan era</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="tsrc">Sources: Federal Reserve Summary of Economic Projections (Mar 2026), Bureau of Economic Analysis (BEA), BLS, US Treasury Fiscal Data</div>
+  </div>
+
+  <!-- T4 -->
+  <div class="tier-block">
+    <div class="tier-header">Tier 4 — Structural wildcards</div>
+    <div class="tier-sub">Present / absent only. These are not scored — they are either a feature of the episode or not.</div>
+    <div class="tbl-wrap">
+      <table>
+        <thead><tr><th>Wildcard factor</th><th class="cur">2026</th><th>2022</th><th>1974</th><th>2020</th><th>1980</th></tr></thead>
+        <tbody>
+          <tr><td>De-dollarization as policy</td><td class="cur"><span class="wc-y">✓</span></td><td><span class="wc-y">✓</span> <span class="tsub">Russia sanctions</span></td><td><span class="wc-n">—</span></td><td><span class="wc-n">—</span></td><td><span class="wc-n">—</span></td></tr>
+          <tr><td>CB buying 1,000t+/year</td><td class="cur"><span class="wc-y">✓</span></td><td><span class="wc-y">✓</span></td><td><span class="wc-n">—</span></td><td><span class="wc-n">—</span></td><td><span class="wc-n">—</span></td></tr>
+          <tr><td>Fiscal dominance constraint</td><td class="cur"><span class="wc-y">✓</span> <span class="tsub">$36T debt</span></td><td><span class="a">Partial</span></td><td><span class="wc-n">—</span></td><td><span class="a">Partial</span></td><td><span class="wc-n">—</span></td></tr>
+          <tr><td>PBOC as major gold buyer</td><td class="cur"><span class="wc-y">✓</span></td><td><span class="wc-y">✓</span> <span class="tsub">emerging</span></td><td><span class="wc-n">—</span></td><td><span class="wc-n">—</span></td><td><span class="wc-n">—</span></td></tr>
+          <tr><td>Gold as Tier 1 bank asset</td><td class="cur"><span class="wc-y">✓</span> <span class="tsub">2025</span></td><td><span class="wc-n">—</span></td><td><span class="wc-n">—</span></td><td><span class="wc-n">—</span></td><td><span class="wc-n">—</span></td></tr>
+          <tr><td>Active kinetic war</td><td class="cur"><span class="wc-y">✓</span> <span class="tsub">Iran</span></td><td><span class="wc-y">✓</span> <span class="tsub">Ukraine</span></td><td><span class="wc-y">✓</span> <span class="tsub">Yom Kippur</span></td><td><span class="wc-n">—</span></td><td><span class="wc-y">✓</span> <span class="tsub">Iran/USSR</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="no-analogue">The first four wildcards above (de-dollarization, 1,000t+ CB buying, fiscal dominance, PBOC scale) are unique to the post-2022 era with no historical precedent. Historical drawdowns of −52% (1974) and −43% (1980) occurred when central banks were net sellers. These figures likely overstate current downside risk.</div>
+    <div class="tsrc">Sources: WGC Central Bank Gold Reserves Survey 2025, BIS Basel III Gold Tier 1 framework, US Treasury Fiscal Data, PBOC reserve disclosures</div>
+  </div>
+
+  <!-- INTERPRETATION -->
+  <div class="interp-box">
+    <strong>What the data shows:</strong> The 2022 episode is the closest structural match — similar real rates trajectory, oil shock mechanism, CB buying floor, and active war context. The most critical difference between 2026 and 1974/1980 is the CB demand column: net sellers then, aggressive buyers now (1,082t in 2022, 863t in 2025). This is the single strongest reason the −52% and −43% historical drawdowns likely overstate current downside risk. The 2026 debt/GDP ratio (~125%) also constrains the Fed's ability to replicate Volcker-style rate hikes — gold's biggest historical headwind is structurally capped. The 2022 analogue — a −21% total drawdown, which equates to ~$4,421 from the January peak — is the most data-supported base case. The $4,400 strike on this product sits uncomfortably close to that level.
+  </div>
+</section>
+
+<!-- ═══ VERDICT ═══ -->
+<section class="tab-content" id="tab-verdict">
+
+  <h2 class="stitle">Strategy framing — limit-order with yield</h2>
+  <p style="font-size:14px;color:var(--text2);line-height:1.7;margin-bottom:20px">
+    Your goal is to <strong style="color:var(--text)">accumulate gold at $4,400</strong> and earn yield while waiting. Under this framing the Reverse Convertible (RC) functions identically to a <strong style="color:var(--text)">cash-secured put</strong> — you collect $2,795 today for committing to buy gold at an effective cost of <strong style="color:var(--text)">$4,280/oz</strong> (strike minus coupon per unit), which is 6.2% cheaper than today's spot of $4,562. This is a coherent and well-structured accumulation strategy.
+  </p>
+
+  <h2 class="stitle">The two outcomes on April 30</h2>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:24px">
+    <div style="background:var(--green-dim);border:1px solid rgba(26,122,74,0.25);border-radius:8px;padding:16px">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--green);margin-bottom:8px">If gold stays ≥ $4,400</div>
+      <div style="font-size:20px;font-weight:500;color:var(--text)">+$2,795 cash</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:6px;line-height:1.5">Full coupon paid. No gold acquired. 30.5% p.a. earned on idle capital for 33 days. Re-enter another RC or buy spot if desired.</div>
+    </div>
+    <div style="background:var(--amber-dim);border:1px solid rgba(176,125,46,0.25);border-radius:8px;padding:16px">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--amber);margin-bottom:8px">If gold falls below $4,400</div>
+      <div style="font-size:20px;font-weight:500;color:var(--text)">23.36 oz XAU</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:6px;line-height:1.5">Gold delivered at effective cost of <strong style="color:var(--text)">$4,280/oz</strong> — $282 cheaper than today's spot. A 6.2% discount built in via the coupon.</div>
+    </div>
+  </div>
+
+  <h2 class="stitle">Goal alignment</h2>
+  <div class="frow"><div class="ficon">✅</div><div><div class="ftitle">Effective cost basis $4,280 — below every major bank's year-end target</div><div class="fbody">If delivered, your acquisition price is $4,280/oz — below today's spot, below the Reuters consensus of $4,746, and well below Goldman Sachs ($5,400), JPMorgan ($6,300), and Wells Fargo ($6,100–$6,300). Even Commerzbank, the most bearish named institution, targets $4,400 — your strike. If your long-term gold thesis is intact, $4,280 is a well-supported entry. <span class="pill pg">Aligned with goal</span></div></div></div>
+  <div class="frow"><div class="ficon">✅</div><div><div class="ftitle">You get paid $2,795 to wait — a passive limit order earns nothing</div><div class="fbody">A standard limit buy order at $4,400 costs nothing but yields nothing while you wait. This RC pays 30.5% p.a. for the same commitment. If gold never reaches $4,400 over 33 days, you keep the cash and repeat — effectively getting paid to wait for your target accumulation price. <span class="pill pg">Aligned with goal</span></div></div></div>
+  <div class="frow"><div class="ficon">✅</div><div><div class="ftitle">$4,400 is a technically defensible accumulation zone</div><div class="fbody">Multiple analysts identify $4,325–$4,400 as a key support zone entering Q2 2026. The 2022 analogue — the closest structural match — bottomed near this level (~$4,421 equivalent). Central banks historically increase buying at these correction levels. <span class="pill pg">Aligned with goal</span></div></div></div>
+  <div class="frow"><div class="ficon">⚠️</div><div><div class="ftitle">The real risk: gold continuing to fall past $4,400 after delivery</div><div class="fbody">The breach is the intended outcome. The risk is gold gaps through $4,400 and keeps falling to $3,800 or lower. After delivery you hold 23.36 oz with no downside protection. At $3,800 your position is worth $88,768 — an $11,232 paper loss despite the coupon. Size this position according to the drawdown you can hold through. <span class="pill pa">Key risk to size for</span></div></div></div>
+  <div class="frow"><div class="ficon">⚠️</div><div><div class="ftitle">33-day window limits you to one cycle</div><div class="fbody">A passive limit order stays open indefinitely. This RC expires April 30 — if gold is at $4,401 on expiry and falls to $4,200 the next day, you collect the coupon but miss the accumulation. Consider rolling into a new RC if the target isn't reached, or a GTC limit order on spot for open-ended accumulation.</div></div></div>
+  <div class="frow"><div class="ficon">⚠️</div><div><div class="ftitle">Until delivery, you hold a Julius Baer obligation — not gold</div><div class="fbody">The RC is an unsecured claim on Bank Julius Baer (Moody's A3). You do not own gold until delivery on May 5. If Julius Baer defaults before then, you lose $100,000 with no recourse to the gold market. For a 33-day window with an A3-rated institution this is low-probability, but it is structurally different from holding physical gold or an ETF. <span class="pill pa">Confirm settlement mechanics</span></div></div></div>
+
+  <h2 class="stitle" style="margin-top:28px">Stress test — position value at expiry</h2>
+  <div style="overflow-x:auto;border:1px solid var(--border);border-radius:8px">
+    <table style="width:100%;border-collapse:collapse;font-size:12px;min-width:600px">
+      <thead><tr>
+        <th style="padding:9px 12px;font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;background:var(--bg3);border-bottom:1px solid var(--border);text-align:left">Gold at April 30</th>
+        <th style="padding:9px 12px;font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;background:var(--bg3);border-bottom:1px solid var(--border);text-align:left">What you receive</th>
+        <th style="padding:9px 12px;font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;background:var(--bg3);border-bottom:1px solid var(--border);text-align:left">USD value</th>
+        <th style="padding:9px 12px;font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;background:var(--bg3);border-bottom:1px solid var(--border);text-align:left">vs. $100k invested</th>
+        <th style="padding:9px 12px;font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;background:var(--bg3);border-bottom:1px solid var(--border);text-align:left">vs. buying spot today</th>
+        <th style="padding:9px 12px;font-size:10px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;background:var(--bg3);border-bottom:1px solid var(--border);text-align:left">Precedent</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:9px 12px;color:var(--text);font-weight:500">$5,000 (+9.6%)</td><td style="padding:9px 12px;color:var(--text2)">$102,795 cash</td><td style="padding:9px 12px;color:#60B080">$102,795</td><td style="padding:9px 12px;color:#60B080">+2.80%</td><td style="padding:9px 12px;color:#E07060">Missed +9.6% rally</td><td style="padding:9px 12px;color:var(--text3)">Ceasefire / bull resumes</td></tr>
+        <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:9px 12px;color:var(--text);font-weight:500">$4,562 (flat)</td><td style="padding:9px 12px;color:var(--text2)">$102,795 cash</td><td style="padding:9px 12px;color:#60B080">$102,795</td><td style="padding:9px 12px;color:#60B080">+2.80%</td><td style="padding:9px 12px;color:#60B080">+2.80% vs. flat spot</td><td style="padding:9px 12px;color:var(--text3)">Sideways consolidation</td></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:9px 12px;color:var(--text);font-weight:500">$4,401 (just above)</td><td style="padding:9px 12px;color:var(--text2)">$102,795 cash</td><td style="padding:9px 12px;color:#60B080">$102,795</td><td style="padding:9px 12px;color:#60B080">+2.80%</td><td style="padding:9px 12px;color:#60B080">Coupon beats spot</td><td style="padding:9px 12px;color:var(--text3)">Near miss</td></tr>
+        <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:9px 12px;color:var(--gold);font-weight:500">$4,399 (just breached)</td><td style="padding:9px 12px;color:var(--text2)">23.36 oz XAU</td><td style="padding:9px 12px;color:#60B080">$102,771</td><td style="padding:9px 12px;color:#60B080">+2.77%</td><td style="padding:9px 12px;color:#60B080">Cost basis $4,280</td><td style="padding:9px 12px;color:var(--text3)">Accumulation starts</td></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:9px 12px;color:var(--text);font-weight:500">$4,280 (break-even)</td><td style="padding:9px 12px;color:var(--text2)">23.36 oz XAU</td><td style="padding:9px 12px;color:var(--text2)">$100,013</td><td style="padding:9px 12px;color:var(--text2)">~flat</td><td style="padding:9px 12px;color:#60B080">6.2% below today's spot</td><td style="padding:9px 12px;color:var(--text3)">Coupon absorbed</td></tr>
+        <tr style="border-bottom:1px solid var(--border);background:rgba(255,255,255,0.02)"><td style="padding:9px 12px;color:var(--text);font-weight:500">$4,100 (−10.1%)</td><td style="padding:9px 12px;color:var(--text2)">23.36 oz XAU</td><td style="padding:9px 12px;color:var(--gold-light)">$95,776</td><td style="padding:9px 12px;color:var(--gold-light)">−4.2%</td><td style="padding:9px 12px;color:#60B080">Still cheaper than spot</td><td style="padding:9px 12px;color:var(--text3)">2022 analogue trough</td></tr>
+        <tr style="border-bottom:1px solid var(--border)"><td style="padding:9px 12px;color:var(--text);font-weight:500">$3,800 (−16.7%)</td><td style="padding:9px 12px;color:var(--text2)">23.36 oz XAU</td><td style="padding:9px 12px;color:#E07060">$88,768</td><td style="padding:9px 12px;color:#E07060">−11.2%</td><td style="padding:9px 12px;color:#E07060">Paper loss deepens</td><td style="padding:9px 12px;color:var(--text3)">Extended bear</td></tr>
+        <tr><td style="padding:9px 12px;color:var(--text);font-weight:500">$3,200 (−29.8%)</td><td style="padding:9px 12px;color:var(--text2)">23.36 oz XAU</td><td style="padding:9px 12px;color:#E07060">$74,752</td><td style="padding:9px 12px;color:#E07060">−25.2%</td><td style="padding:9px 12px;color:#E07060">Significant loss</td><td style="padding:9px 12px;color:var(--text3)">1974-style (CB-adjusted)</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="font-size:11px;color:var(--text3);margin-top:8px;line-height:1.55">"vs. buying spot today" compares your effective cost basis after coupon to buying 21.91 oz at $4,562 today. This RC always gives a cheaper cost basis on delivery — the question is whether you can hold through further downside after receipt.</p>
+
+  <div style="background:var(--green-dim);border:1px solid rgba(26,122,74,0.25);border-radius:10px;padding:20px 22px;margin:24px 0 12px">
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:10px">Verdict — well-suited to accumulation goal</div>
+    <div style="font-size:14px;color:var(--text);line-height:1.7">Under your stated goal of accumulating gold at $4,400, this Reverse Convertible is a well-structured execution strategy. It pays you $2,795 to commit to buying gold at an effective cost of $4,280/oz — 6.2% below today's spot. Every major bank's year-end target sits above your effective cost basis. The product is coherent and aligned with the goal. The primary risk to manage is position sizing: if gold falls materially past $4,400 after delivery, the paper loss can be significant before any recovery. Size according to the drawdown you are prepared to hold through.</div>
+  </div>
+
+  <div style="background:var(--amber-dim);border:1px solid rgba(176,125,46,0.25);border-radius:10px;padding:20px 22px;margin-bottom:24px">
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--amber);margin-bottom:10px">One remaining caution</div>
+    <div style="font-size:14px;color:var(--text);line-height:1.7">Until delivery on May 5, you hold a claim on Bank Julius Baer — not gold. A GTC limit order on spot gold or a cash-secured put via listed options achieves the same economic goal with no issuer credit risk and no expiry constraint. The RC is the better choice only if the $2,795 coupon justifies the 33-day window and A3 credit exposure in your view.</div>
+  </div>
+
+  <h2 class="stitle">Alternatives under the same accumulation goal</h2>
+  <div class="acard"><div class="atitle">Cash-secured put on GLD / IAU (listed options)</div><div class="abody">Same economic structure — sell a put at your target strike, collect premium, either keep cash or acquire gold at a discount. No issuer credit risk. Flexible on strike and expiry. Requires options access.</div></div>
+  <div class="acard"><div class="atitle">$4,200 strike RC — same issuer, same date</div><div class="abody">Lower effective cost ($4,130/oz after coupon vs. $4,280) and a wider buffer. Earns $1,695 instead of $2,795. Choose this if $4,200 is your preferred entry price and you want more confidence of not being breached.</div></div>
+  <div class="acard"><div class="atitle">GTC limit order on spot gold or ETF</div><div class="abody">No credit risk, no expiry, no coupon. Accumulates at $4,400 whenever it trades there — not just on April 30. The RC is superior if you value the $2,795 yield premium over the flexibility and simplicity of a plain limit order.</div></div>
+
+  <div class="disclaimer">
+    <strong>Disclaimer.</strong> This analysis was prepared by an AI system for informational purposes only and does not constitute financial advice, investment advice, or a solicitation to buy or sell any financial instrument. It does not take into account individual investment objectives, financial situation, or needs. All prices, forecasts, and analyst targets are from third-party sources and subject to change. Past performance and historical analogues are not indicative of future results. Investors should consult a qualified financial adviser before making any investment decision. Bank Julius Baer product terms are as stated in the official fact sheet dated 31 March 2026.
+  </div>
+</section>
+
+<footer class="footer">
+  <span class="footer-logo">Investment Analysis</span>
+  <span>Julius Baer 30.5% RC · XAU/USD · Strike $4,400 · Prepared 31 March 2026</span>
+</footer>
+
+<script>
+const STRIKE=4400,DENOM=100000,CONV=23.36,INITIAL=4561.91,PEAK=5597;
+const dark=true,gc='rgba(255,255,255,0.06)',tc='#5A5855';
+
+function showTab(id,btn){
+  document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+function calc(){
+  const p=parseFloat(document.getElementById('gp').value);
+  document.getElementById('gd').textContent='$'+p.toLocaleString();
+  const pu=document.getElementById('pu'),pp=document.getElementById('pp'),pn=document.getElementById('pn'),pb=document.getElementById('pb');
+  if(p>=STRIKE){
+    pu.textContent='$102,795.83';pu.style.color='#60B080';
+    pp.textContent='+2.7958% — full cash payout (30.5% p.a.)';
+    pb.innerHTML='<span class="pill pg">Above $4,400 — USD payout ✓</span>';
+    pn.textContent='Gold at $'+p.toLocaleString()+' is above the $4,400 strike. Max coupon paid regardless of how much higher gold goes.';
+  } else {
+    const v=CONV*p,pct=((v-DENOM)/DENOM*100).toFixed(2);
+    pu.textContent='XAU 23.36 ≈ $'+Math.round(v).toLocaleString();
+    pu.style.color=v>=DENOM?'#60B080':'#E07060';
+    pp.textContent=(pct>=0?'+':'')+pct+'% vs investment ($'+Math.round(v-DENOM).toLocaleString()+')';
+    pb.innerHTML='<span class="pill pr">Below $4,400 — gold delivery ✗</span>';
+    pn.textContent='You receive 23.36 oz XAU worth ~$'+Math.round(v).toLocaleString()+' at that price.'+(v<DENOM?' Net loss: $'+Math.round(DENOM-v).toLocaleString()+'.':' Coupon cushion holds — still positive.');
+  }
+}
+calc();
+
+// Payoff chart
+const px=[],py=[];
+for(let p=3200;p<=5500;p+=25){px.push(p);py.push(p>=STRIKE?102795.83:CONV*p);}
+new Chart(document.getElementById('payoffChart'),{
+  type:'line',data:{labels:px,datasets:[{data:py,borderColor:'#4CAF7D',backgroundColor:'rgba(76,175,125,0.07)',borderWidth:2.5,pointRadius:0,pointHoverRadius:7,pointHoverBackgroundColor:'#4CAF7D',pointHoverBorderColor:'#1A1D24',pointHoverBorderWidth:2,fill:true,tension:0}]},
+  options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+    plugins:{legend:{display:false},
+      tooltip:{backgroundColor:'#1A1D24',borderColor:'rgba(255,255,255,0.12)',borderWidth:1,titleColor:'#E8E6DF',bodyColor:'#9A9890',padding:12,cornerRadius:8,
+        callbacks:{title:i=>'Gold at $'+px[i[0].dataIndex].toLocaleString(),
+          label(i){const p=px[i.dataIndex],v=py[i.dataIndex],pct=((v-DENOM)/DENOM*100).toFixed(2),chg=((p-INITIAL)/INITIAL*100).toFixed(1);
+            return['  Scenario: '+(p>=STRIKE?'Cash payout ✓':'Gold delivery ✗'),'  Redemption: $'+Math.round(v).toLocaleString(),'  P&L: '+(pct>=0?'+':'')+pct+'%',p>=STRIKE?'  Ann. return: 30.5% p.a.':'  Oz received: 23.36 XAU','  Vs today: '+(chg>=0?'+':'')+chg+'%'];}
+        }
+      },
+      annotation:{annotations:{
+        strike:{type:'line',scaleID:'x',value:px.findIndex(p=>p>=STRIKE),borderColor:'#C0392B',borderWidth:1.5,label:{content:'Strike $4,400',display:true,position:'start',yAdjust:-12,backgroundColor:'rgba(192,57,43,0.12)',color:'#E07060',font:{size:10},padding:{x:5,y:2},borderRadius:3}},
+        today:{type:'line',scaleID:'x',value:px.findIndex(p=>p>=INITIAL),borderColor:'#5B9BD5',borderWidth:1.5,borderDash:[4,3],label:{content:'Today $4,562',display:true,position:'start',yAdjust:12,backgroundColor:'rgba(91,155,213,0.1)',color:'#70A8D8',font:{size:10},padding:{x:5,y:2},borderRadius:3}}
+      }}
+    },
+    scales:{x:{ticks:{autoSkip:true,maxTicksLimit:8,color:tc,font:{size:11},callback:(v,i)=>'$'+px[i].toLocaleString()},grid:{color:gc}},y:{ticks:{color:tc,font:{size:11},callback:v=>'$'+Math.round(v/1000)+'k'},grid:{color:gc}}}
+  }
+});
+
+// % Drawdown chart
+const mos=[0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18];
+const c26=[0,0,-3.2,-18.5,null,null,null,null,null,null,null,null,null,null,null,null,null,null,null];
+const e22=[0,-2,-5,-9,-13,-16,-18,-19.5,-21,-20,-17,-12,-7,-3,0,3,7,10,14];
+const e74=[0,-3,-7,-13,-20,-28,-35,-42,-46,-49,-51,-52,-50,-47,-42,-36,-30,-23,-15];
+const e20=[0,0,-14,-12,-8,-4,0,4,9,13,15,17,20,22,25,28,30,33,35];
+const s44p=-((PEAK-4400)/PEAK*100),s42p=-((PEAK-4200)/PEAK*100);
+new Chart(document.getElementById('pctChart'),{
+  type:'line',
+  data:{labels:mos.map(m=>m===0?'Peak':'M+'+m),datasets:[
+    {label:'2026 current',data:c26,borderColor:'#4CAF7D',borderWidth:3,pointRadius:ctx=>ctx.dataIndex===3&&c26[3]!=null?6:0,pointBackgroundColor:'#4CAF7D',tension:0.35,spanGaps:false,backgroundColor:'transparent'},
+    {label:'2022 (87%)',data:e22,borderColor:'#5B9BD5',borderWidth:1.5,pointRadius:0,tension:0.35,backgroundColor:'transparent'},
+    {label:'1974 (61%)',data:e74,borderColor:'#C9963A',borderWidth:1.5,pointRadius:0,tension:0.35,backgroundColor:'transparent'},
+    {label:'2020 (56%)',data:e20,borderColor:'#444',borderWidth:1.5,pointRadius:0,tension:0.35,borderDash:[5,4],backgroundColor:'transparent'}
+  ]},
+  options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+    plugins:{legend:{display:false},
+      tooltip:{backgroundColor:'#1A1D24',borderColor:'rgba(255,255,255,0.12)',borderWidth:1,titleColor:'#E8E6DF',bodyColor:'#9A9890',padding:12,cornerRadius:8,
+        callbacks:{title:i=>i[0].dataIndex===0?'At peak':'Month +'+i[0].dataIndex+' from peak',
+          label(i){if(i.raw==null)return null;const usd=Math.round(PEAK*(1+i.raw/100));return`  ${i.dataset.label}: ${i.raw>=0?'+':''}${i.raw.toFixed(1)}%  (~$${usd.toLocaleString()})`;},
+          afterBody(items){const cur=items.find(i=>i.dataset.label==='2026 current');if(!cur||cur.raw==null)return[];if(cur.raw<=s42p)return['  ⚠ Both strikes breached'];if(cur.raw<=s44p)return['  ⚠ $4,400 breached — $4,200 intact'];return['  ✓ Both strikes safe'];}
+        }
+      },
+      annotation:{annotations:{
+        s44:{type:'line',scaleID:'y',value:s44p,borderColor:'#C0392B',borderWidth:1.5,label:{content:'$4,400  (−21.4%)',display:true,position:'start',backgroundColor:'rgba(192,57,43,0.12)',color:'#E07060',font:{size:10},padding:{x:5,y:2},borderRadius:3}},
+        s42:{type:'line',scaleID:'y',value:s42p,borderColor:'#C9963A',borderWidth:1.5,borderDash:[4,3],label:{content:'$4,200  (−25.0%)',display:true,position:'end',backgroundColor:'rgba(201,150,58,0.1)',color:'#E8B86D',font:{size:10},padding:{x:5,y:2},borderRadius:3}}
+      }}
+    },
+    scales:{x:{ticks:{color:tc,font:{size:11},maxTicksLimit:10},grid:{color:gc}},y:{ticks:{color:tc,font:{size:11},callback:v=>(v>0?'+':'')+v+'%'},grid:{color:gc}}}
+  }
+});
+
+// Analyst targets
+const banks=['JPMorgan','Wells Fargo','UBS','Deutsche Bank','Goldman Sachs','Reuters median\n(30 analysts)','HSBC bear','Commerzbank'];
+const tgts=[6300,6200,6200,6000,5400,4746,4500,4400];
+const cols=['#4CAF7D','#4CAF7D','#4CAF7D','#5DCAA5','#C9963A','#C9963A','#C0392B','#C0392B'];
+new Chart(document.getElementById('targetChart'),{
+  type:'bar',data:{labels:banks,datasets:[{data:tgts,backgroundColor:cols.map(c=>c+'22'),borderColor:cols,borderWidth:1.5,borderRadius:3,borderSkipped:false}]},
+  options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},
+      tooltip:{backgroundColor:'#1A1D24',borderColor:'rgba(255,255,255,0.12)',borderWidth:1,titleColor:'#E8E6DF',bodyColor:'#9A9890',padding:10,cornerRadius:8,
+        callbacks:{label:ctx=>[`  Target: $${ctx.raw.toLocaleString()}`,`  From today: ${((ctx.raw-4562)/4562*100).toFixed(1)}%`]}
+      },
+      annotation:{annotations:{
+        tod:{type:'line',scaleID:'x',value:4562,borderColor:'#4CAF7D',borderWidth:2,label:{content:'Today $4,562',display:true,position:'start',backgroundColor:'rgba(76,175,125,0.1)',color:'#4CAF7D',font:{size:10},padding:{x:5,y:2},borderRadius:3}},
+        st44:{type:'line',scaleID:'x',value:4400,borderColor:'#C0392B',borderWidth:1.5,label:{content:'$4,400',display:true,position:'end',backgroundColor:'transparent',color:'#E07060',font:{size:10}}},
+        st42:{type:'line',scaleID:'x',value:4200,borderColor:'#C9963A',borderWidth:1.5,borderDash:[4,3],label:{content:'$4,200',display:true,position:'end',yAdjust:14,backgroundColor:'transparent',color:'#E8B86D',font:{size:10}}}
+      }}
+    },
+    scales:{x:{min:3500,max:6800,ticks:{color:tc,font:{size:11},callback:v=>'$'+(v/1000).toFixed(1)+'k'},grid:{color:gc}},y:{ticks:{color:tc,font:{size:11}},grid:{display:false}}}
+  }
+});
+</script>
+</body>
+</html>
